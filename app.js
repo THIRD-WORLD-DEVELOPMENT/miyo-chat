@@ -104,8 +104,19 @@ async function init() {
     
     try {
         console.log('Fetching environment variables...')
-        const r = await fetch('./.netlify/functions/env')
-        const env = await r.json()
+        let env = { SUPABASE_URL: '', SUPABASE_ANON: '' }
+        
+        try {
+            const r = await fetch('./.netlify/functions/env')
+            if (r.ok) {
+                env = await r.json()
+            } else {
+                console.log('Netlify function not available, using empty env')
+            }
+        } catch (error) {
+            console.log('Could not fetch env from Netlify function:', error)
+        }
+        
         console.log('Environment variables:', env)
         
         if (!env.SUPABASE_URL || !env.SUPABASE_ANON) {
@@ -1345,34 +1356,40 @@ function setupRealtime() {
 }
 
 // Global function for Google login (accessible from HTML)
-window.handleGoogleLogin = async function() {
+function handleGoogleLogin() {
     console.log('Google login button clicked!')
     
     try {
         if (!supabase) {
             console.log('Supabase not initialized yet')
-            alert('App is still loading, please wait...')
+            alert('Supabase not configured yet. Please set up Supabase environment variables in Netlify.')
             return
         }
         
         console.log('Attempting Google OAuth login...')
-        const result = await supabase.auth.signInWithOAuth({
+        supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { scopes: 'profile email' }
+        }).then(result => {
+            console.log('OAuth result:', result)
+            
+            if (result.error) {
+                console.error('OAuth error:', result.error)
+                alert('Login failed: ' + result.error.message)
+            }
+        }).catch(error => {
+            console.error('Login error:', error)
+            alert('Login failed: ' + error.message)
         })
-        
-        console.log('OAuth result:', result)
-        
-        if (result.error) {
-            console.error('OAuth error:', result.error)
-            alert('Login failed: ' + result.error.message)
-        }
         
     } catch (error) {
         console.error('Login error:', error)
         alert('Login failed: ' + error.message)
     }
 }
+
+// Make it globally accessible
+window.handleGoogleLogin = handleGoogleLogin
 
 // Initialize the app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
