@@ -1329,6 +1329,24 @@ function setupRealtime() {
         .subscribe()
 }
 
+// Global function for Google login (accessible from HTML)
+window.handleGoogleLogin = async function() {
+    try {
+        if (!supabase) {
+            showNotification('App is still loading, please wait...', 'warning')
+            return
+        }
+        
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { scopes: 'profile email' }
+        })
+    } catch (error) {
+        console.error('Login error:', error)
+        showNotification('Login failed. Please check your Supabase configuration.', 'error')
+    }
+}
+
 // Initialize the app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure login page is visible initially
