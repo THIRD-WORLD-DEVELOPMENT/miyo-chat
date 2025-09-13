@@ -88,6 +88,8 @@ html, body, #app {
   bottom: 0;
   background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23334155" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
   opacity: 0.3;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .login-card {
@@ -98,7 +100,7 @@ html, body, #app {
   box-shadow: var(--shadow-xl);
   backdrop-filter: blur(10px);
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-width: 400px;
   max-width: 500px;
 }
@@ -1054,6 +1056,9 @@ input:focus {
   font-size: 1rem;
   cursor: pointer;
   transition: var(--transition);
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .login-btn:hover {
