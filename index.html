@@ -5,55 +5,179 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ChatMiyo</title>
 <link rel="stylesheet" href="/style.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div id="app">
-<header>
-<div class="brand">ChatMiyo</div>
+<!-- Login Page -->
+<div id="loginPage" class="login-container">
+<div class="login-card">
+<div class="login-header">
+<div class="logo">
+<i class="fas fa-comments"></i>
+<h1>ChatMiyo</h1>
+</div>
+<p class="login-subtitle">Connect with friends and family</p>
+</div>
+<div class="login-content">
 <div id="authArea"></div>
+<div class="login-features">
+<div class="feature">
+<i class="fas fa-users"></i>
+<span>Group Chats</span>
+</div>
+<div class="feature">
+<i class="fas fa-user-friends"></i>
+<span>Friends System</span>
+</div>
+<div class="feature">
+<i class="fas fa-shield-alt"></i>
+<span>Secure & Private</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" class="hidden">
+<header class="app-header">
+<div class="header-left">
+<div class="brand">
+<i class="fas fa-comments"></i>
+<span>ChatMiyo</span>
+</div>
+</div>
+<div class="header-right">
+<div id="authArea"></div>
+</div>
 </header>
+
 <main id="main">
 <section id="leftPane">
-<div id="profile" class="card hidden">
-<img id="avatar" />
-<div>
-<div id="displayName" class="display"></div>
-<div id="email" class="muted"></div>
+<div id="profile" class="card profile-card hidden">
+<div class="profile-info">
+<img id="avatar" class="profile-avatar" />
+<div class="profile-details">
+<div id="displayName" class="profile-name"></div>
+<div id="email" class="profile-email"></div>
 </div>
 </div>
-<div id="controls" class="card hidden">
-<button id="newDmBtn">New DM</button>
-<button id="newGroupBtn">New Group</button>
-<div id="inviteArea">
-<input id="inviteInput" placeholder="username to invite" />
-<button id="inviteBtn">Invite to Group</button>
+<button id="profileSettings" class="profile-settings">
+<i class="fas fa-cog"></i>
+</button>
+</div>
+
+<div id="controls" class="card controls-card hidden">
+<div class="control-buttons">
+<button id="newDmBtn" class="control-btn">
+<i class="fas fa-plus"></i>
+<span>New DM</span>
+</button>
+<button id="newGroupBtn" class="control-btn">
+<i class="fas fa-users"></i>
+<span>New Group</span>
+</button>
+</div>
+<div id="inviteArea" class="invite-section">
+<input id="inviteInput" placeholder="Enter username to invite" />
+<button id="inviteBtn" class="invite-btn">
+<i class="fas fa-paper-plane"></i>
+</button>
 </div>
 </div>
+
 <div id="contacts" class="card">
-<h3>Chats</h3>
-<ul id="chatList"></ul>
+<div class="card-header">
+<h3><i class="fas fa-comment-dots"></i> Chats</h3>
 </div>
+<ul id="chatList" class="chat-list"></ul>
+</div>
+
 <div id="friends" class="card">
-<h3>Friends</h3>
-<ul id="friendsList"></ul>
-<input id="addFriendInput" placeholder="username to add" />
-<button id="addFriendBtn">Add Friend</button>
+<div class="card-header">
+<h3><i class="fas fa-user-friends"></i> Friends</h3>
+<div class="friend-actions">
+<button id="addFriendBtn" class="add-friend-btn">
+<i class="fas fa-user-plus"></i>
+</button>
+</div>
+</div>
+<div class="friend-search">
+<input id="addFriendInput" placeholder="Search or add friends..." />
+</div>
+<ul id="friendsList" class="friends-list"></ul>
 </div>
 </section>
+
 <section id="rightPane">
-<div id="roomHeader" class="card">
-<div id="roomTitle">Select a chat</div>
+<div id="roomHeader" class="card room-header">
+<div class="room-info">
+<img id="roomAvatar" class="room-avatar" />
+<div class="room-details">
+<div id="roomTitle" class="room-title">Select a chat</div>
+<div id="roomStatus" class="room-status"></div>
 </div>
-<div id="messagesWrap" class="card messages"></div>
-<form id="msgForm" class="card hidden">
-<input id="msgInput" placeholder="Type a message" autocomplete="off" />
-<input id="fileInput" type="file" />
-<button type="submit" id="sendBtn">Send</button>
+</div>
+<div class="room-actions">
+<button id="roomSettings" class="room-action-btn">
+<i class="fas fa-cog"></i>
+</button>
+<button id="roomMembers" class="room-action-btn">
+<i class="fas fa-users"></i>
+</button>
+</div>
+</div>
+
+<div id="messagesWrap" class="messages-container">
+<div id="messagesList" class="messages-list"></div>
+<div id="typingIndicator" class="typing-indicator hidden">
+<div class="typing-dots">
+<span></span>
+<span></span>
+<span></span>
+</div>
+<span class="typing-text">Someone is typing...</span>
+</div>
+</div>
+
+<form id="msgForm" class="message-form hidden">
+<div class="message-input-container">
+<input id="msgInput" placeholder="Type a message..." autocomplete="off" />
+<div class="message-actions">
+<button type="button" id="attachBtn" class="action-btn">
+<i class="fas fa-paperclip"></i>
+</button>
+<input id="fileInput" type="file" class="file-input" />
+<button type="submit" id="sendBtn" class="send-btn">
+<i class="fas fa-paper-plane"></i>
+</button>
+</div>
+</div>
 </form>
 </section>
 </main>
 </div>
+
+<!-- Modals -->
+<div id="modalOverlay" class="modal-overlay hidden">
+<div id="modal" class="modal">
+<div class="modal-header">
+<h3 id="modalTitle"></h3>
+<button id="modalClose" class="modal-close">
+<i class="fas fa-times"></i>
+</button>
+</div>
+<div id="modalContent" class="modal-content"></div>
+</div>
+</div>
+
+<!-- Notifications -->
+<div id="notifications" class="notifications"></div>
+</div>
+
 <script type="module" src="/app.js"></script>
 </body>
 </html>
