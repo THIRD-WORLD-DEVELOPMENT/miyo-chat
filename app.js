@@ -210,9 +210,11 @@ async function init() {
                 script.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
                 script.onload = () => {
                     console.log('Supabase library loaded manually')
+                    console.log('window.supabase after manual load:', window.supabase)
                     initializeSupabase(env)
                 }
-                script.onerror = () => {
+                script.onerror = (error) => {
+                    console.error('Failed to load Supabase script:', error)
                     alert('Failed to load Supabase library. Please check your internet connection or try a different network.')
                 }
                 document.head.appendChild(script)
