@@ -1,4 +1,38 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/esm/supabase.js'
+// Global function for Google login (accessible from HTML immediately)
+function handleGoogleLogin() {
+    console.log('Google login button clicked!')
+    
+    try {
+        if (!window.supabase) {
+            console.log('Supabase not initialized yet')
+            alert('Supabase not configured yet. Please set up Supabase environment variables in Netlify.')
+            return
+        }
+        
+        console.log('Attempting Google OAuth login...')
+        window.supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { scopes: 'profile email' }
+        }).then(result => {
+            console.log('OAuth result:', result)
+            
+            if (result.error) {
+                console.error('OAuth error:', result.error)
+                alert('Login failed: ' + result.error.message)
+            }
+        }).catch(error => {
+            console.error('Login error:', error)
+            alert('Login failed: ' + error.message)
+        })
+        
+    } catch (error) {
+        console.error('Login error:', error)
+        alert('Login failed: ' + error.message)
+    }
+}
+
+// Make it globally accessible immediately
+window.handleGoogleLogin = handleGoogleLogin
 
 // Global state
 let supabase = null
@@ -127,6 +161,7 @@ async function init() {
         
         console.log('Creating Supabase client...')
         supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
+        window.supabase = supabase // Make it globally accessible
         console.log('Supabase client created successfully')
         
         await handleSession()
@@ -1355,41 +1390,6 @@ function setupRealtime() {
         .subscribe()
 }
 
-// Global function for Google login (accessible from HTML)
-function handleGoogleLogin() {
-    console.log('Google login button clicked!')
-    
-    try {
-        if (!supabase) {
-            console.log('Supabase not initialized yet')
-            alert('Supabase not configured yet. Please set up Supabase environment variables in Netlify.')
-            return
-        }
-        
-        console.log('Attempting Google OAuth login...')
-        supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { scopes: 'profile email' }
-        }).then(result => {
-            console.log('OAuth result:', result)
-            
-            if (result.error) {
-                console.error('OAuth error:', result.error)
-                alert('Login failed: ' + result.error.message)
-            }
-        }).catch(error => {
-            console.error('Login error:', error)
-            alert('Login failed: ' + error.message)
-        })
-        
-    } catch (error) {
-        console.error('Login error:', error)
-        alert('Login failed: ' + error.message)
-    }
-}
-
-// Make it globally accessible
-window.handleGoogleLogin = handleGoogleLogin
 
 // Initialize the app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
