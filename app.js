@@ -1329,5 +1329,18 @@ function setupRealtime() {
         .subscribe()
 }
 
-// Initialize the app
-init()
+// Initialize the app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Ensure login page is visible initially
+    const loginPage = document.getElementById('loginPage')
+    const mainApp = document.getElementById('mainApp')
+    
+    if (loginPage) {
+        loginPage.classList.remove('hidden')
+    }
+    if (mainApp) {
+        mainApp.classList.add('hidden')
+    }
+    
+    init()
+})
