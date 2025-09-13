@@ -100,10 +100,23 @@ function scrollToBottom() {
 
 // Initialize app
 async function init() {
+    console.log('Initializing ChatMiyo app...')
+    
     try {
-        const r = await fetch('/.netlify/functions/env')
+        console.log('Fetching environment variables...')
+        const r = await fetch('./.netlify/functions/env')
         const env = await r.json()
+        console.log('Environment variables:', env)
+        
+        if (!env.SUPABASE_URL || !env.SUPABASE_ANON) {
+            console.error('Missing Supabase environment variables')
+            alert('Supabase not configured. Please set SUPABASE_URL and SUPABASE_ANON in Netlify environment variables.')
+            return
+        }
+        
+        console.log('Creating Supabase client...')
         supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
+        console.log('Supabase client created successfully')
         
         await handleSession()
         supabase.auth.onAuthStateChange((_, sess) => {
@@ -116,9 +129,11 @@ async function init() {
         })
         
         setupEventListeners()
+        console.log('App initialization complete!')
+        
     } catch (error) {
         console.error('Initialization failed:', error)
-        showNotification('Failed to initialize app', 'error')
+        alert('Failed to initialize app: ' + error.message)
     }
 }
 
@@ -1331,19 +1346,31 @@ function setupRealtime() {
 
 // Global function for Google login (accessible from HTML)
 window.handleGoogleLogin = async function() {
+    console.log('Google login button clicked!')
+    
     try {
         if (!supabase) {
-            showNotification('App is still loading, please wait...', 'warning')
+            console.log('Supabase not initialized yet')
+            alert('App is still loading, please wait...')
             return
         }
         
-        await supabase.auth.signInWithOAuth({
+        console.log('Attempting Google OAuth login...')
+        const result = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { scopes: 'profile email' }
         })
+        
+        console.log('OAuth result:', result)
+        
+        if (result.error) {
+            console.error('OAuth error:', result.error)
+            alert('Login failed: ' + result.error.message)
+        }
+        
     } catch (error) {
         console.error('Login error:', error)
-        showNotification('Login failed. Please check your Supabase configuration.', 'error')
+        alert('Login failed: ' + error.message)
     }
 }
 
