@@ -160,7 +160,10 @@ async function init() {
         }
         
         console.log('Creating Supabase client...')
-        supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
+        if (typeof supabase === 'undefined') {
+            throw new Error('Supabase library not loaded. Please check your internet connection.')
+        }
+        supabase = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
         window.supabase = supabase // Make it globally accessible
         console.log('Supabase client created successfully')
         
