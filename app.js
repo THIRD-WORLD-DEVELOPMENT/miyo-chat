@@ -3,14 +3,14 @@ function handleGoogleLogin() {
     console.log('Google login button clicked!')
     
     try {
-        if (!window.supabase) {
+        if (!window.supabaseClient) {
             console.log('Supabase not initialized yet')
             alert('Supabase not configured yet. Please set up Supabase environment variables in Netlify.')
             return
         }
         
         console.log('Attempting Google OAuth login...')
-        window.supabase.auth.signInWithOAuth({
+        window.supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: { scopes: 'profile email' }
         }).then(result => {
@@ -160,11 +160,11 @@ async function init() {
         }
         
         console.log('Creating Supabase client...')
-        if (typeof supabase === 'undefined') {
+        if (typeof window.supabase === 'undefined') {
             throw new Error('Supabase library not loaded. Please check your internet connection.')
         }
-        supabase = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
-        window.supabase = supabase // Make it globally accessible
+        supabase = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
+        window.supabaseClient = supabase // Make it globally accessible with different name
         console.log('Supabase client created successfully')
         
         await handleSession()
