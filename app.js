@@ -197,26 +197,30 @@ async function init() {
         }
         
         console.log('Creating Supabase client...')
-        console.log('Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')))
-        console.log('window.supabase:', window.supabase)
         
-        if (typeof window.supabase === 'undefined') {
-            console.log('Supabase library not found. Trying alternative...')
-            // Try to load it manually
-            const script = document.createElement('script')
-            script.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
-            script.onload = () => {
-                console.log('Supabase library loaded manually')
-                initializeSupabase(env)
+        // Wait a bit for the Supabase library to load
+        setTimeout(() => {
+            console.log('Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')))
+            console.log('window.supabase:', window.supabase)
+            
+            if (typeof window.supabase === 'undefined') {
+                console.log('Supabase library not found. Trying alternative...')
+                // Try to load it manually
+                const script = document.createElement('script')
+                script.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+                script.onload = () => {
+                    console.log('Supabase library loaded manually')
+                    initializeSupabase(env)
+                }
+                script.onerror = () => {
+                    alert('Failed to load Supabase library. Please check your internet connection or try a different network.')
+                }
+                document.head.appendChild(script)
+                return
             }
-            script.onerror = () => {
-                alert('Failed to load Supabase library. Please check your internet connection or try a different network.')
-            }
-            document.head.appendChild(script)
-            return
-        }
-        
-        initializeSupabase(env)
+            
+            initializeSupabase(env)
+        }, 100) // Wait 100ms for the library to load
         
     } catch (error) {
         console.error('Initialization failed:', error)
