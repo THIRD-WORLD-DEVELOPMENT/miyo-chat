@@ -132,6 +132,43 @@ function scrollToBottom() {
     messagesList.scrollTop = messagesList.scrollHeight
 }
 
+// Initialize Supabase client
+function initializeSupabase(env) {
+    try {
+        console.log('Initializing Supabase with env:', env)
+        supabase = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
+        window.supabaseClient = supabase // Make it globally accessible with different name
+        console.log('Supabase client created successfully')
+        
+        // Continue with the rest of initialization
+        continueInitialization()
+    } catch (error) {
+        console.error('Error creating Supabase client:', error)
+        alert('Failed to create Supabase client: ' + error.message)
+    }
+}
+
+// Continue initialization after Supabase is ready
+async function continueInitialization() {
+    try {
+        await handleSession()
+        supabase.auth.onAuthStateChange((_, sess) => {
+            me = sess?.user || null
+            renderAuth()
+            if (me) {
+                setupRealtime()
+                loadUserProfile()
+            }
+        })
+        
+        setupEventListeners()
+        console.log('App initialization complete!')
+    } catch (error) {
+        console.error('Error in continueInitialization:', error)
+        alert('Failed to complete initialization: ' + error.message)
+    }
+}
+
 // Initialize app
 async function init() {
     console.log('Initializing ChatMiyo app...')
@@ -160,25 +197,26 @@ async function init() {
         }
         
         console.log('Creating Supabase client...')
+        console.log('Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')))
+        console.log('window.supabase:', window.supabase)
+        
         if (typeof window.supabase === 'undefined') {
-            throw new Error('Supabase library not loaded. Please check your internet connection.')
-        }
-        supabase = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON)
-        window.supabaseClient = supabase // Make it globally accessible with different name
-        console.log('Supabase client created successfully')
-        
-        await handleSession()
-        supabase.auth.onAuthStateChange((_, sess) => {
-            me = sess?.user || null
-            renderAuth()
-            if (me) {
-                setupRealtime()
-                loadUserProfile()
+            console.log('Supabase library not found. Trying alternative...')
+            // Try to load it manually
+            const script = document.createElement('script')
+            script.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+            script.onload = () => {
+                console.log('Supabase library loaded manually')
+                initializeSupabase(env)
             }
-        })
+            script.onerror = () => {
+                alert('Failed to load Supabase library. Please check your internet connection or try a different network.')
+            }
+            document.head.appendChild(script)
+            return
+        }
         
-        setupEventListeners()
-        console.log('App initialization complete!')
+        initializeSupabase(env)
         
     } catch (error) {
         console.error('Initialization failed:', error)
@@ -301,7 +339,7 @@ async function promptUsername() {
         
         try {
             const { data: exists } = await supabase.from('users').select('id').eq('username', username).maybeSingle()
-            if (exists) {
+        if (exists) {
                 showNotification('Username already taken', 'error')
                 return
             }
@@ -378,7 +416,7 @@ async function fetchFriends() {
             friendsList.appendChild(pendingHeader)
             
             pendingData.forEach(request => {
-                const li = document.createElement('li')
+            const li = document.createElement('li')
                 li.className = 'friend-request-item'
                 
                 const img = document.createElement('img')
@@ -425,8 +463,8 @@ async function fetchFriends() {
                 li.appendChild(friendInfo)
                 li.appendChild(friendActions)
                 
-                friendsList.appendChild(li)
-            })
+            friendsList.appendChild(li)
+        })
         }
         
         // Show friends
@@ -804,12 +842,12 @@ function showNewDMModal() {
         }
         
         try {
-            const { data: target } = await supabase.from('users').select('*').eq('username', username).maybeSingle()
-            if (!target) {
+        const { data: target } = await supabase.from('users').select('*').eq('username', username).maybeSingle()
+        if (!target) {
                 showNotification('User not found', 'error')
-                return
-            }
-            
+            return
+        }
+        
             await startDM(target)
             hideModal()
         } catch (error) {
@@ -966,31 +1004,31 @@ async function showNewGroupModal() {
         }
         
         try {
-            const { data } = await supabase.from('rooms')
-                .insert([{
-                    type: 'group',
-                    title,
-                    created_by: me.id,
-                    last_text: null
-                }])
-                .select()
-                .single()
-            
+        const { data } = await supabase.from('rooms')
+            .insert([{
+                type: 'group',
+                title,
+                created_by: me.id,
+                last_text: null
+            }])
+            .select()
+            .single()
+        
             // Add all selected members
             const members = Array.from(selectedUserIds).map(userId => ({
-                room_id: data.id,
+            room_id: data.id,
                 user_id: userId,
                 role: userId === me.id ? 'owner' : 'member'
             }))
             
             await supabase.from('room_members').insert(members)
-            
-            openRoom(data.id)
+        
+        openRoom(data.id)
             fetchChats()
             hideModal()
             showNotification('Group created successfully!', 'success')
-        } catch (error) {
-            console.error('Error creating group:', error)
+    } catch (error) {
+        console.error('Error creating group:', error)
             showNotification('Failed to create group', 'error')
         }
     })
@@ -999,17 +1037,17 @@ async function showNewGroupModal() {
 }
 
 async function handleInvite() {
-    if (!currentRoom) {
+        if (!currentRoom) {
         showNotification('Open a group first', 'warning')
-        return
-    }
-    
-    const uname = inviteInput.value.trim().toLowerCase()
-    if (!uname) {
+            return
+        }
+        
+        const uname = inviteInput.value.trim().toLowerCase()
+        if (!uname) {
         showNotification('Enter username', 'warning')
-        return
-    }
-    
+            return
+        }
+        
     try {
         const { data: room } = await supabase.from('rooms').select('*').eq('id', currentRoom).single()
         
@@ -1069,12 +1107,12 @@ async function handleInvite() {
 }
 
 async function handleAddFriend() {
-    const username = addFriendInput.value.trim().toLowerCase()
+        const username = addFriendInput.value.trim().toLowerCase()
     if (!username) {
         showNotification('Please enter a username', 'warning')
         return
     }
-    
+        
     try {
         const { data: target } = await supabase.from('users').select('*').eq('username', username).maybeSingle()
         if (!target) {
@@ -1405,7 +1443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (mainApp) {
         mainApp.classList.add('hidden')
-    }
-    
-    init()
+}
+
+init()
 })
